@@ -1,4 +1,6 @@
 import mapboxgl from 'mapbox-gl';
+// Adding MapboxGeocoder package
+import MapboxGeocoder from '@mapbox/mapbox-gl-geocoder';
 
 const initMapbox = () => {
   const mapElement = document.getElementById('map');
@@ -17,13 +19,30 @@ const initMapbox = () => {
     mapboxgl.accessToken = mapElement.dataset.mapboxApiKey;
     const map = new mapboxgl.Map({
       container: 'map',
-      style: 'mapbox://styles/mapbox/streets-v10'
+      style: 'mapbox://styles/nproto/cketgz09z6afq19mxsgzv36sd'
     });
+
+    // Adding search bar for Mapbox
+    map.addControl(new MapboxGeocoder({ accessToken: mapboxgl.accessToken,
+                                    mapboxgl: mapboxgl }));
+
 
     const markers = JSON.parse(mapElement.dataset.markers);
     markers.forEach((marker) => {
-      new mapboxgl.Marker()
+      const popup = new mapboxgl.Popup().setHTML(marker.infoWindow); // add this
+
+      // Create a HTML element for your custom marker
+      const element = document.createElement('div');
+      element.className = 'marker';
+      element.style.backgroundImage = `url('${marker.image_url}')`;
+      element.style.backgroundSize = 'contain';
+      element.style.width = '20px';
+      element.style.height = '25px';
+
+      // Pass the element as an argument to the new marker
+      new mapboxgl.Marker(element)
         .setLngLat([marker.lng, marker.lat])
+        .setPopup(popup) // add this
         .addTo(map);
     });
     fitMapToMarkers(map, markers);
